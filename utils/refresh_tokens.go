@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	"crypto/rand"
 	"encoding/base64"
-	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func GenerateRefreshToken() (string, error) {

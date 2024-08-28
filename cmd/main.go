@@ -1,10 +1,14 @@
 package main
 
 import (
-	"net/http"
-	"github.com/gorilla/mux"
-	"log"
 	"encoding/json"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/Taala2/auth-service/utils"
+	"github.com/Taala2/auth-service/models"
+
 )
 
 func main() {
@@ -20,21 +24,21 @@ func GetTokenHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.URL.Query().Get("user_id")
 	ip := r.RemoteAddr
 
-	accessToken, err := GenerateAccessToken(userID, ip)
+	accessToken, err := utils.GenerateAccessToken(userID, ip)
 	if err != nil {
 		http.Error(w, "Error generating access token", http.StatusInternalServerError)
 		return
 	}
 
-	refreshToken, err := GenerateRefreshToken()
+	refreshToken, err := utils.GenerateRefreshToken()
 	if err != nil {
 		http.Error(w, "Error generating refresh token", http.StatusInternalServerError)
 		return
 	}
 
 	// Save refreshToken in DB with hashed version
-
-	tokens := TokenPair{
+	
+	tokens := models.TokenPair{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
@@ -54,7 +58,7 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate access token
-	_, err := ValidateAccessToken(req.AccessToken)
+	_, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		http.Error(w, "Invalid access token", http.StatusUnauthorized)
 		return
@@ -65,13 +69,13 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Generate new tokens
 	ip := r.RemoteAddr
-	newAccessToken, err := GenerateAccessToken("userID", ip)
+	newAccessToken, err := utils.GenerateAccessToken("userID", ip)
 	if err != nil {
 		http.Error(w, "Error generating new access token", http.StatusInternalServerError)
 		return
 	}
 
-	newRefreshToken, err := GenerateRefreshToken()
+	newRefreshToken, err := utils.GenerateRefreshToken()
 	if err != nil {
 		http.Error(w, "Error generating new refresh token", http.StatusInternalServerError)
 		return
@@ -79,7 +83,7 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Update stored refresh token hash in DB
 
-	tokens := TokenPair{
+	tokens := models.TokenPair{
 		AccessToken:  newAccessToken,
 		RefreshToken: newRefreshToken,
 	}
