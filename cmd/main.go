@@ -36,8 +36,6 @@ func GetTokenHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Save refreshToken in DB with hashed version
-	
 	tokens := models.TokenPair{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -57,17 +55,14 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate access token
+
 	_, err := utils.ValidateAccessToken(req.AccessToken)
 	if err != nil {
 		http.Error(w, "Invalid access token", http.StatusUnauthorized)
 		return
 	}
 
-	// Validate refresh token
-	// Retrieve stored hash from DB and compare with provided refresh token
 
-	// Generate new tokens
 	ip := r.RemoteAddr
 	newAccessToken, err := utils.GenerateAccessToken("userID", ip)
 	if err != nil {
